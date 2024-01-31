@@ -20,7 +20,7 @@ pipeline {
                 junit '**/target/*.xml' 
             }
         }
-                }
+    }
 
                  stages {
         stage('Deploy') {
