@@ -1,27 +1,32 @@
-node {
-    def mvnHome
-    stage('Preparation') { // for display purposes
-        // Get some code from a GitHub repository
-        git 'https://github.com/jglick/simple-maven-project-with-tests.git'
-        // Get the Maven tool.
-        // ** NOTE: This 'M3' Maven tool must be configured
-        // **       in the global configuration.
-        mvnHome = tool 'M3'
-    }
-    stage('Build') {
-        // Run the maven build
-        withEnv(["MVN_HOME=$mvnHome"]) {
-            if (isUnix()) {
-                sh '"$MVN_HOME/bin/mvn" -Dmaven.test.failure.ignore clean package'
-            } else {
-                bat(/"%MVN_HOME%\bin\mvn" -Dmaven.test.failure.ignore clean package/)
-            }
-        }
-    }
-    stage('Results') {
-        junit '**/target/surefire-reports/TEST-*.xml'
-        archiveArtifacts 'target/*.jar'
-    }
+pipeline {
+   agent any
+
+   stages {
+      stage('Build') {
+         steps {
+            sh 'rm -rf build' 
+            sh 'mkdir build' // create a new folder
+            sh 'touch build/car.txt' // create an empty file
+            sh 'echo "chassis" >> build/car.txt' // put chassis inside the file
+            sh 'echo "engine" >> build/car.txt' // put engine inside the file
+            sh 'echo "body" >> build/car.txt' // put body inside the file
+         }
+      }
+      stage('Test') {
+         steps {
+            sh 'test -f build/car.txt'
+            sh 'grep "chassis" build/car.txt'
+            sh 'grep "engine" build/car.txt'
+            sh 'grep "body" build/car.txt'
+         }
+      }
+      stage('Publish') {
+          steps {
+            archiveArtifacts artifacts: 'build/'
+          }
+      }      
+   }
+}
 }
                  stages {
         stage('Deploy') {
